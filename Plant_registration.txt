@@ -1,0 +1,97 @@
+Version 1
+---------
+
+@startuml
+title "Регистрация"
+autonumber
+
+Actor User
+participant FrontEnd as FE
+participant BackEnd as BE
+participant UUID
+database Database as DB
+
+activate User
+User -> FE: Инициировать регистрацию\n(Ввод логина/пароля)
+activate FE
+FE -> FE: Валидация
+   alt Успешная валидация
+   activate FE
+   deactivate FE
+   activate BE
+   FE -> BE: Записать в БД (POST /registration)
+   BE -> UUID: Создать уникальный ID
+   activate UUID
+   UUID -> UUID: Создание ID
+   UUID --> BE: ID создан
+   deactivate UUID
+   BE -> DB: SQL-запрос: Создать запись
+   activate DB
+   DB -> DB: Создание записи\nо новом пользователе
+      alt Данные внесены в БД
+      DB --> BE: Запись создана
+      BE --> FE: Запрос успешно обработан\n(статус 201 Created)
+      FE --> User: Сообщение об\nуспешной регистрации
+      else Ошибка БД
+      
+      end
+
+   deactivate DB
+   deactivate BE
+   FE --> User: Сообщение об\nуспешной регистрации
+   else Валидация провалена
+   FE --> User: Сообщение об ошибке валидации
+   deactivate FE
+   deactivate User
+   end
+@enduml
+
+-------------------------------------------------------------------------
+
+Version 2
+---------
+
+@startuml
+title "Регистрация"
+autonumber
+
+Actor User
+participant FrontEnd as FE
+participant BackEnd as BE
+participant UUID
+database Database as DB
+
+activate User
+User -> FE: Инициировать регистрацию\n(Ввод логина/пароля)
+activate FE
+FE -> FE: Валидация
+  alt Успешная валидация
+    activate FE
+    deactivate FE
+    activate BE
+    FE -> BE: Записать в БД (POST /registration)
+    BE -> UUID: Создать уникальный ID
+    activate UUID
+    UUID -> UUID: Создание ID
+    UUID --> BE: ID создан
+    deactivate UUID
+    BE -> DB: SQL-запрос: Создать запись
+    activate DB
+  DB -> DB: Создание записи\nо новом пользователе
+    alt Данные внесены в БД
+      DB --> BE: Запись создана
+      BE --> FE: Запрос успешно обработан\n(статус 201 Created)
+      FE --> User: Сообщение об\nуспешной регистрации
+    else Ошибка БД
+      DB --> BE: Не удалось записать данные
+      BE --> FE: Ошибка: 500 Internal Server Error
+      FE --> User: Сообщение о серверной ошибке
+    deactivate DB
+    deactivate BE
+    end
+  FE --> User: Сообщение об\nуспешной регистрации
+  else Валидация не пройдена
+  FE --> User: Сообщение об ошибке валидации
+  deactivate FE
+  deactivate User
+  end
